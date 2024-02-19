@@ -39,9 +39,9 @@ public class DriveTrain extends SubsystemBase {
     private final Field2d field = new Field2d();
 
     private final DifferentialDriveOdometry odometry = new DifferentialDriveOdometry(
-      m_gyro.getRotation2d(), 
-      0, 
-      0);
+        m_gyro.getRotation2d(), 
+        0, 
+        0);
 
     public DriveTrain() {
         initializePigeon2(m_gyro.getConfigurator());
@@ -104,9 +104,7 @@ public class DriveTrain extends SubsystemBase {
         m_leftEncoder.setPosition(0);
         m_rightEncoder.setPosition(0);
     }
-    public void DriveAuto(){
-       
-    }
+
     /**Gets the average distance of the two encoders.
     * @return the average of the two encoder readings
     */
@@ -175,7 +173,7 @@ public class DriveTrain extends SubsystemBase {
         /* Multiply geared rotations by meters per rotation */
         return gearedRotations * metersPerWheelRotation; 
     }
-    private double metersToRotations(double meters) {
+    /*private double metersToRotations(double meters) {
          //Get circumference of wheel 
         final double circumference = Constants.kWheelDiameterInches * Math.PI;
         // Every rotation of the wheel travels this many inches 
@@ -185,7 +183,7 @@ public class DriveTrain extends SubsystemBase {
         double wheelRotations = wheelRotationsPerMeter * meters;
         // And multiply by gear ratio to get rotor rotations 
         return wheelRotations * Constants.kDriveGearRatio;
-      }
+      }*/
 @Override
   public void periodic() {
     // This method will be called once per scheduler run

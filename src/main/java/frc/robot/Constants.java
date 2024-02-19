@@ -33,6 +33,9 @@ public final class Constants {
     public static String CANBUS_NAME = "rio";
     public static final int kRightShooterMotor_ID = 8;
     public static final int kLeftShooterMotor_ID = 9;
+    public static final int kClimberMotorRight_ID = 10;
+    public static final int kClimberMotorLeft_ID = 11;
+
   /*Drivetrain Constants */
     public static final double kDriveGearRatio = 6.86; //2 REV-21-1650s connected to single output
     public static final int    kDriveEncoderCPR = 42; //used Hall-Sensor Encoder Resolution from data sheet for REV-21-1650
@@ -55,13 +58,13 @@ public final class Constants {
     public static final double kArmZeroCosineOffset = 1.342; // radians to add to converted arm position to get real-world arm position (starts at ~76.9deg angle)
     public static final ArmFeedforward kArmFeedforward =
         new ArmFeedforward(0.0005, 2.0, .50 / kArmFreeSpeed, 0.0);
-    public static final PIDGains kArmPositionGains = new PIDGains(3, 0.00, 0.1);
+    public static final PIDGains kArmPositionGains = new PIDGains(.8, 0.00, 0.1);
     public static final TrapezoidProfile.Constraints kArmMotionConstraint =
-        new TrapezoidProfile.Constraints(.03, .02);
+        new TrapezoidProfile.Constraints(.5, .5);
 
     public static final double kHomePosition = 0.0;
     public static final double kScoringPosition = .3;
-    public static final double kFeedPosition = 0.54;
+    public static final double kFeedPosition = 0.565;
 
   /*Intake Constants */
   public static final double kIntake_Out_POW =  1;
