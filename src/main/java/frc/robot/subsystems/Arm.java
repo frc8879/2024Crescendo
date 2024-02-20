@@ -30,7 +30,7 @@ public class Arm extends SubsystemBase{
     public Arm() {
         m_armMotor.setInverted(Constants.kArmInverted);
         m_armMotor.setIdleMode(IdleMode.kBrake);
-        m_armMotor.setSmartCurrentLimit(Constants.kCurrentLimit);
+        m_armMotor.setSmartCurrentLimit(Constants.kArmCurrentLimit);
 
         m_armEncoder.setPosition(0);
         m_armEncoder.setPositionConversionFactor(Constants.kArmGearRatio);

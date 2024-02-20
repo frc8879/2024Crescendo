@@ -21,6 +21,8 @@ public final class Constants {
     public static final int OPERATOR_PORT = 1;
 
   /*CAN BUS IDs */
+    public static String CANBUS_NAME = "rio";
+    
     public static final int LEFT_LEAD_ID = 3;
     public static final int RIGHT_LEAD_ID = 1;
     public static final int LEFT_FOLLOW_ID = 4;
@@ -30,9 +32,10 @@ public final class Constants {
 
     public static final int kArmMotor_ID = 6;
     public static final int kIntakeMotor_ID = 7;
-    public static String CANBUS_NAME = "rio";
+    
     public static final int kRightShooterMotor_ID = 8;
     public static final int kLeftShooterMotor_ID = 9;
+
     public static final int kClimberMotorRight_ID = 10;
     public static final int kClimberMotorLeft_ID = 11;
 
@@ -40,7 +43,7 @@ public final class Constants {
     public static final double kDriveGearRatio = 6.86; //2 REV-21-1650s connected to single output
     public static final int    kDriveEncoderCPR = 42; //used Hall-Sensor Encoder Resolution from data sheet for REV-21-1650
     public static final double kWheelDiameterInches = 6;
-    public static final double kWheelCircumference = kWheelDiameterInches * Math.PI;// actual equation is gearRatio * circumference of wheel in meters. Check math
+    public static final double kWheelCircumference = kWheelDiameterInches * Math.PI;
     public static final double kEncoderConversionFactor =(kWheelDiameterInches * Math.PI) * kDriveGearRatio;
     public static final boolean kGyroReversed = false;
     public static final boolean kLeftEncoderReversed = false;
@@ -49,30 +52,31 @@ public final class Constants {
   /*Arm Constants */
     public static final boolean kArmInverted = true;
 
-    public static final int kCurrentLimit = 50;
+    public static final int kArmCurrentLimit = 50;
 
     public static final double kArmGearRatio = 0.04;//Conversion Factior did not like doing math, 1/25 used here
     public static final double kPositionFactor = kArmGearRatio* 2.0* Math.PI; // multiply SM value by this number and get arm position in radians
     public static final double kArmVelocityFactor = kArmGearRatio * 2.0 * Math.PI / 60.0;
     public static final double kArmFreeSpeed = 5676.0 * kArmVelocityFactor;
     public static final double kArmZeroCosineOffset = 1.342; // radians to add to converted arm position to get real-world arm position (starts at ~76.9deg angle)
-    public static final ArmFeedforward kArmFeedforward =
-        new ArmFeedforward(0.0005, 2.0, .50 / kArmFreeSpeed, 0.0);
     public static final PIDGains kArmPositionGains = new PIDGains(.8, 0.00, 0.1);
-    public static final TrapezoidProfile.Constraints kArmMotionConstraint =
-        new TrapezoidProfile.Constraints(.5, .5);
+    public static final ArmFeedforward kArmFeedforward =
+      new ArmFeedforward(0.0005, 2.0, .50 / kArmFreeSpeed, 0.0);
+    public static final TrapezoidProfile.Constraints kArmMotionConstraint = 
+      new TrapezoidProfile.Constraints(.5, .5);
 
     public static final double kHomePosition = 0.0;
     public static final double kScoringPosition = .3;
-    public static final double kFeedPosition = 0.565;
+    public static final double kFeedPosition = 0.56;
 
   /*Intake Constants */
-  public static final double kIntake_Out_POW =  1;
-  public static final double kIntake_In_POW = 1;
-  public static final int kIntake_Current_Limit = 30;
-  public static final int kIntake_Hold_Current_Limit = 10;
+    public static final double kIntakeOutPOW =  0.5;
+    public static final double kIntakeInPOW = -0.5;
+    public static final int kIntakeCurrentLimit = 30;
+    public static final int kIntakeHoldCurrentLimit = 10;
 
-
+  /*Global Constants */
+    public static final double kMotorOff = 0.0;
   
 }
 

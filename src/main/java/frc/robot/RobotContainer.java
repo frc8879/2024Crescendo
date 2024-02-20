@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Commands.IntakeHardStop; 
 
 
 /**
@@ -28,12 +29,12 @@ public class RobotContainer {
   private final Intake intake = new Intake();
   private final Shooter shooter = new Shooter();
   private final Climbers climbers = new Climbers();
-
  
   
   private final CommandXboxController driver = new CommandXboxController(Constants.DRIVER_PORT);
   private final CommandXboxController operator = new CommandXboxController(Constants.OPERATOR_PORT);
-  
+
+
   public RobotContainer() {
     //set drivetrain subsystem default to our drive command
     driveTrain.setDefaultCommand(new RunCommand(() -> {
@@ -42,15 +43,8 @@ public class RobotContainer {
     // set the arm subsystem to run the "runAutomatic" function continuously when no other command is running
     arm.setDefaultCommand(new RunCommand(() -> {
       arm.runAutomatic();}, arm));
-
-    /*Use this default arm command for manual testing of the arm 
-      arm.setDefaultCommand(new RunCommand(() -> {
-      arm.armMove(-operator.getLeftY());},arm));
-    */
-
     
-
-
+    
      // Configure the trigger bindings
      configureBindings();
     }
@@ -83,8 +77,10 @@ public class RobotContainer {
     driver.rightTrigger()
     .onTrue(new InstantCommand(() -> climbers.climberDown()))
     .onFalse(new InstantCommand(() -> climbers.climberStop()));
-    }
-    
+  
+    driver.x().onTrue(new IntakeHardStop(intake));
+
+  }
   
 
 
