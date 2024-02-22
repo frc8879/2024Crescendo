@@ -14,6 +14,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Commands.FullPickup;
+import frc.robot.Commands.FullShooter;
 import frc.robot.Commands.IntakeHardStop; 
 
 
@@ -52,34 +54,32 @@ public class RobotContainer {
   private void configureBindings() {
      // set up arm preset positions
     operator.b()
-      .onTrue(new InstantCommand(() -> arm.setTargetPosition(Constants.kScoringPosition)));
+      .onTrue(new FullPickup(intake, arm, driveTrain));
     operator.a()
       .onTrue(new InstantCommand(() -> arm.setTargetPosition(Constants.kFeedPosition)));
     operator.y()
       .onTrue(new InstantCommand(() -> arm.setTargetPosition(Constants.kHomePosition)));
 
     operator.x()
-    .onTrue(new InstantCommand(() -> shooter.activeShooter()))
-    .onFalse (new InstantCommand(()-> shooter.stopShooter()));
+    .onTrue(new FullShooter(intake, shooter));
     
-    operator.rightTrigger()
-      .onTrue(new InstantCommand(() -> intake.IntakeShoot()))
-      .onFalse(new InstantCommand(() -> intake.IntakeStop()));
 
-    operator.leftTrigger()
-      .onFalse(new InstantCommand(() ->intake.IntakeStop()))
-      .onTrue(new InstantCommand(() -> intake.IntakeFeed()));
       
     driver.leftTrigger()
-    .onTrue(new InstantCommand(() -> climbers.climberUp()))
-    .onFalse(new InstantCommand(() -> climbers.climberStop()));
+    .onTrue(new InstantCommand(() -> climbers.leftClimberDown()))
+    .onFalse(new InstantCommand(() -> climbers.leftClimberStop()));
 
     driver.rightTrigger()
-    .onTrue(new InstantCommand(() -> climbers.climberDown()))
-    .onFalse(new InstantCommand(() -> climbers.climberStop()));
+    .onTrue(new InstantCommand(() -> climbers.rightClimberDown()))
+    .onFalse(new InstantCommand(() -> climbers.rightClimberStop()));
   
-    driver.x().onTrue(new IntakeHardStop(intake));
+    driver.rightBumper()
+    .onTrue(new InstantCommand(() -> climbers.rightClimberUp()))
+    .onFalse (new InstantCommand(() -> climbers.rightClimberStop()));
 
+    driver.leftBumper()
+    .onTrue(new InstantCommand(() -> climbers.leftClimberUp()))
+    .onFalse(new InstantCommand(()-> climbers.leftClimberStop()));
   }
   
 

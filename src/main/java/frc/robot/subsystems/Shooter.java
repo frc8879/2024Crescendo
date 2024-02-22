@@ -27,8 +27,8 @@ public void resetEncoders(){
     m_ShooterEncoder2.setPosition(0);
 }
 public void activeShooter(){
-    m_ShooterMotor.set(1);
-    m_ShooterMotor2.set(1);
+    m_ShooterMotor.set(.9);
+    m_ShooterMotor2.set(.9);
 }
 public void stopShooter(){
     m_ShooterMotor.set(0);

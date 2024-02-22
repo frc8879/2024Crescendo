@@ -11,7 +11,7 @@ import frc.robot.Constants;
 public class Intake extends SubsystemBase {
     private final CANSparkMax m_IntakeMotor = new CANSparkMax(Constants.kIntakeMotor_ID, MotorType.kBrushless);
     private final DigitalInput m_rightLimitSwitch = new DigitalInput(0);
-
+    
     public Intake() {
         //Setting default settings for motor
         m_IntakeMotor.setInverted(true);
@@ -32,7 +32,7 @@ public class Intake extends SubsystemBase {
     }
 
     public boolean isNoteIn(){
-        return m_rightLimitSwitch.get() == false;
+        return m_rightLimitSwitch.get() == true;
     }
 }
 

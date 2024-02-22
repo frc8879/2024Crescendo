@@ -10,6 +10,7 @@ import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.configs.Pigeon2Configurator;
 import com.ctre.phoenix6.hardware.Pigeon2;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.SendableRegistry;
@@ -38,16 +39,16 @@ public class DriveTrain extends SubsystemBase {
 
     private final Field2d field = new Field2d();
 
-    private final DifferentialDriveOdometry odometry = new DifferentialDriveOdometry(
-        m_gyro.getRotation2d(), 
-        0, 
-        0);
+    private final DifferentialDriveOdometry m_odometry; 
 
     public DriveTrain() {
         initializePigeon2(m_gyro.getConfigurator());
         
         resetEncoders();
-    
+        m_odometry =
+        new DifferentialDriveOdometry(
+            m_gyro.getRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition());
+
         // Set the second sparks on each side to follow the leader.
         SendableRegistry.addChild(diffDrive, m_driveLeftLead);
         SendableRegistry.addChild(diffDrive, m_driveRightLead);
@@ -97,7 +98,7 @@ public class DriveTrain extends SubsystemBase {
         rot = Math.copySign(rot * rot, rot);
 
         //enables differential drive based on fwd value and rot value
-        diffDrive.arcadeDrive(fwd, rot);
+        diffDrive.arcadeDrive(fwd*.75, rot*.75);
     }
 
     public void resetEncoders(){
@@ -193,10 +194,27 @@ public class DriveTrain extends SubsystemBase {
     SmartDashboard.putNumber("Left Encoder POS", getLeftPos());
     SmartDashboard.putNumber("Right Encoder POS", getRightPos());
 
-    odometry.update(m_gyro.getRotation2d(),
+    m_odometry.update(m_gyro.getRotation2d(),
         getLeftPos(),
         getRightPos());
-    field.setRobotPose(odometry.getPoseMeters());
+    field.setRobotPose(m_odometry.getPoseMeters());
+  }
+  /**
+   * Returns the currently-estimated pose of the robot.
+   *
+   * @return The pose.
+   */
+  public Pose2d getPose() {
+    return m_odometry.getPoseMeters();
+  }
+  /**
+   * Resets the odometry to the specified pose.
+   *
+   * @param pose The pose to which to set the odometry.
+   */
+  public void resetOdometry(Pose2d pose) {
+    m_odometry.resetPosition(
+        m_gyro.getRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition(), pose);
   }
   @Override
   public void simulationPeriodic() {

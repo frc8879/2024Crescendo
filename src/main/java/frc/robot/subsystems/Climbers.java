@@ -30,16 +30,23 @@ public void resetEncoders(){
     m_climberRightEncoder.setPosition(0);
     m_climberLeftEncoder.setPosition(0);
 }
-public void climberUp(){
-    m_climberMotorLeft.set(.1);
-    m_climberMotorRight.set(.1);
+
+public void rightClimberUp(){
+    m_climberMotorRight.set(.5);
 }
-public void climberDown(){
-    m_climberMotorLeft.set(-.1);
-    m_climberMotorRight.set(-.1);
+public void leftClimberUp(){
+    m_climberMotorLeft.set(.5);
 }
-public void climberStop(){
-    m_climberMotorLeft.set(0);
+public void leftClimberDown(){
+    m_climberMotorLeft.set(-.5);
+}
+public void rightClimberDown(){
+    m_climberMotorRight.set(-.5);
+}
+public void rightClimberStop(){
     m_climberMotorRight.set(0);
+}
+public void leftClimberStop(){
+    m_climberMotorLeft.set(0);
 }
 }
