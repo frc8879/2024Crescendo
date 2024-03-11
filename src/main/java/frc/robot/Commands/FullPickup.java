@@ -1,5 +1,6 @@
 package frc.robot.Commands;
 
+
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
@@ -15,7 +16,7 @@ public class FullPickup extends SequentialCommandGroup{
         addCommands(
             new InstantCommand(() -> arm.setTargetPosition(Constants.kFeedPosition)),
             new InstantCommand(() -> drivetrain.arcadeDrive(.25, 0)),
-            new IntakeHardStop(intake),
+            new IntakeHardStop(intake).withTimeout(4),
             new InstantCommand(() -> drivetrain.arcadeDrive(0, 0)),
             new InstantCommand(() -> arm.setTargetPosition(Constants.kHomePosition))
         );

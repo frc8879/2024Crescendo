@@ -14,7 +14,7 @@ public class FullShooter extends SequentialCommandGroup{
             new InstantCommand(() -> shooter.activeShooter()),
             new WaitCommand(2),
             new InstantCommand(() -> intake.IntakeShoot()),
-            new WaitCommand(2),
+            new WaitCommand(1),
             new InstantCommand(() -> shooter.stopShooter()),
             new InstantCommand(() -> intake.IntakeStop())
         );

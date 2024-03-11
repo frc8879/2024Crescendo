@@ -32,6 +32,7 @@ public class IntakeHardStop extends Command {
     @Override
     public boolean isFinished(){
         return m_intake.isNoteIn();
+        
     }
 
 }
