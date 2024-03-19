@@ -5,6 +5,8 @@ package frc.robot;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
@@ -73,8 +75,14 @@ public final class Constants {
     public static final DifferentialDriveKinematics kDriveKinematics =
         new DifferentialDriveKinematics(kTrackwidthMeters);
 
-        public static final double kRamseteB = 2;
-        public static final double kRamseteZeta = 0.7;
+    public static final double kRamseteB = 2;
+    public static final double kRamseteZeta = 0.7;
+
+    public static final ChassisSpeeds kChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+      2,
+      2,
+      Math.PI / 2.0, 
+      Rotation2d.fromDegrees(45));
 
   /*Arm Constants */
     public static final boolean kArmInverted = true;
@@ -94,7 +102,7 @@ public final class Constants {
       new TrapezoidProfile.Constraints(.25, 2);
 
     public static final double kHomePosition = 0.0;
-    public static final double kFeedPosition = 3.52;
+    public static final double kFeedPosition = 3.4;
     
   /*Intake Constants */
     public static final double kIntakeOutPOW =  0.35;

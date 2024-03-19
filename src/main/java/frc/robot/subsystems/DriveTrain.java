@@ -2,7 +2,6 @@ package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
-//import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
@@ -12,13 +11,18 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.configs.Pigeon2Configurator;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.SendableRegistry;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -26,12 +30,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class DriveTrain extends SubsystemBase {
-    public static final CANSparkMax m_driveLeftLead = new CANSparkMax(Constants.LEFT_LEAD_ID, MotorType.kBrushless);
+    private final CANSparkMax m_driveLeftLead = new CANSparkMax(Constants.LEFT_LEAD_ID, MotorType.kBrushless);
     private final CANSparkMax m_driveRightLead = new CANSparkMax(Constants.RIGHT_LEAD_ID, MotorType.kBrushless);
     private final CANSparkMax m_driveLeftFollow = new CANSparkMax(Constants.LEFT_FOLLOW_ID, MotorType.kBrushless);
     private final CANSparkMax m_driveRightFollow = new CANSparkMax(Constants.RIGHT_FOLLOW_ID, MotorType.kBrushless);
 
     private final DifferentialDrive diffDrive = new DifferentialDrive(m_driveLeftLead::set, m_driveRightLead::set);
+    private final DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(Constants.kTrackwidthMeters);
 
     private final RelativeEncoder m_leftEncoder = m_driveLeftLead.getEncoder();
     private final RelativeEncoder m_rightEncoder = m_driveRightLead.getEncoder();
@@ -40,22 +45,21 @@ public class DriveTrain extends SubsystemBase {
 
     private final Field2d field = new Field2d();
 
-    private final DifferentialDriveOdometry m_odometry; 
+    private final DifferentialDriveOdometry m_odometry = new DifferentialDriveOdometry(
+            m_gyro.getRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition()); 
 
     final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(8.25);
     final double TARGET_HEIGHT_METERS = Units.inchesToMeters(1.25);
     final double CAMERA_PITCH_RADIANS = Units.degreesToRadians(0);
     final double GOAL_RANGE_METERS = Units.inchesToMeters(7);
-    PhotonCamera frontCam = new PhotonCamera("Microsoft_LifeCam_HD-3000");
+    final PhotonCamera frontCam = new PhotonCamera("Microsoft_LifeCam_HD-3000");
 
     final double LINEAR_P = 2;
     final double LINEAR_D = 0.0;
-    //SparkPIDController forwardController = diffDrive.getPIDController();
     
-
     final double ANGULAR_P = 0.1;
     final double ANGULAR_D = 0.0;
-    //SparkPIDController turnController = new SparkPIDController(ANGULAR_P,0,ANGULAR_D);
+
     double forwardSpeed;
     double rotationSpeed;
 
@@ -78,23 +82,40 @@ public class DriveTrain extends SubsystemBase {
         m_leftEncoder.setVelocityConversionFactor(Constants.kEncoderConversionFactor/60);
         m_rightEncoder.setPositionConversionFactor(Constants.kEncoderConversionFactor);
         m_rightEncoder.setVelocityConversionFactor(Constants.kEncoderConversionFactor/60);
+                
+        //Ensures motors brake when idle
+        m_driveLeftLead.setIdleMode(IdleMode.kBrake);
+        m_driveRightLead.setIdleMode(IdleMode.kBrake);
 
         m_driveLeftLead.burnFlash();
         m_driveLeftFollow.burnFlash();
         m_driveRightLead.burnFlash();
         m_driveLeftFollow.burnFlash();
         
-        //Ensures motors brake when idle
-        m_driveLeftLead.setIdleMode(IdleMode.kBrake);
-        m_driveRightLead.setIdleMode(IdleMode.kBrake);
-        
         //Align update frequency for gyro
         m_gyro.getYaw().setUpdateFrequency(100);
         m_gyro.getPitch().setUpdateFrequency(100);
         m_gyro.getRoll().setUpdateFrequency(100);
         
-        m_odometry = new DifferentialDriveOdometry(
-            m_gyro.getRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition());
+// Configure AutoBuilder last
+    AutoBuilder.configureRamsete(
+            this::getPose, // Robot pose supplier
+            this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting pose)
+            this::getChassisSpeeds, // Current ChassisSpeeds supplier
+            this::driveRobotRelative, // Method that will drive the robot given ChassisSpeeds
+            new ReplanningConfig(), // Default path replanning config. See the API for the options here
+            () -> {
+              // Boolean supplier that controls when the path will be mirrored for the red alliance
+              // This will flip the path being followed to the red side of the field.
+              // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+              var alliance = DriverStation.getAlliance();
+              if (alliance.isPresent()) {
+                return alliance.get() == DriverStation.Alliance.Red;
+              }
+              return false;
+            },
+            this); // Reference to this subsystem to set requirements
 
         SmartDashboard.putData("Field",field);
     }
@@ -145,9 +166,14 @@ public class DriveTrain extends SubsystemBase {
         return m_odometry.getPoseMeters();
     }
 
+
     //Return the current wheel speeds of the robot
     public DifferentialDriveWheelSpeeds getWheelSpeeds(){
-        return new DifferentialDriveWheelSpeeds(m_leftEncoder.getVelocity(),m_rightEncoder.getVelocity());
+       return new DifferentialDriveWheelSpeeds(m_leftEncoder.getVelocity(),m_rightEncoder.getVelocity());
+    }
+
+    public ChassisSpeeds getChassisSpeeds(){
+        return kinematics.toChassisSpeeds(getWheelSpeeds());
     }
 
     //Resets the odometry to the specified pose.
@@ -162,7 +188,15 @@ public class DriveTrain extends SubsystemBase {
         m_driveRightLead.setVoltage(rightVolts);
         diffDrive.feed();
       }
-    
+
+    public void driveFieldRelative(ChassisSpeeds fieldRelativeSpeeds){
+        driveRobotRelative(ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, getPose().getRotation()));
+    }
+
+    public void driveRobotRelative(ChassisSpeeds robotRelativeSpeeds){
+        arcadeDrive(getChassisSpeeds().vxMetersPerSecond, getChassisSpeeds().omegaRadiansPerSecond );
+    }
+
     //Set Encoders to read a position of 0
     public void resetEncoders(){
         m_leftEncoder.setPosition(0);
@@ -213,7 +247,6 @@ public class DriveTrain extends SubsystemBase {
         
         arcadeDrive(power, omega);
     }
-
 
 @Override
   //This method will be called once per scheduler run
