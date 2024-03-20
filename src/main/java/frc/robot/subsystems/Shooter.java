@@ -16,8 +16,8 @@ public Shooter() {
     
     m_ShooterMotor.setInverted(true);
     m_ShooterMotor2.setInverted(false);
-    m_ShooterMotor.setIdleMode(IdleMode.kBrake);
-    m_ShooterMotor2.setIdleMode(IdleMode.kBrake);
+    m_ShooterMotor.setIdleMode(IdleMode.kCoast);
+    m_ShooterMotor2.setIdleMode(IdleMode.kCoast);
     m_ShooterEncoder.getPosition();
     m_ShooterEncoder2.getPosition();
 }
@@ -27,8 +27,8 @@ public void resetEncoders(){
     m_ShooterEncoder2.setPosition(0);
 }
 public void activeShooter(){
-    m_ShooterMotor.set(1);
-    m_ShooterMotor2.set(1);
+    m_ShooterMotor.set(.75);
+    m_ShooterMotor2.set(.75);
 }
 public void stopShooter(){
     m_ShooterMotor.set(0);

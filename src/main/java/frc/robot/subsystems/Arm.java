@@ -30,18 +30,19 @@ public class Arm extends SubsystemBase{
     public Arm() {
         m_armMotor.setInverted(Constants.kArmInverted);
         m_armMotor.setIdleMode(IdleMode.kBrake);
-        m_armMotor.setSmartCurrentLimit(Constants.kCurrentLimit);
+        m_armMotor.setSmartCurrentLimit(Constants.kArmCurrentLimit);
 
         m_armEncoder.setPosition(0);
-        m_armEncoder.setPositionConversionFactor(Constants.kArmGearRatio);
+        m_armEncoder.setPositionConversionFactor(Constants.kArmPositionFactor);
         m_armEncoder.setVelocityConversionFactor(Constants.kArmVelocityFactor);
-        
-        m_armPIDController.setOutputRange(-0.1, 0.6);
+
+        m_armPIDController.setOutputRange(-.1, 0.6);
         PIDGains.setSparkMaxGains(m_armPIDController, Constants.kArmPositionGains);
 
         m_armTimer.start();
         updateMotionProfile();
     }
+
     /**
     * Sets the target position and updates the motion profile if the target position changed.
     * @param _setpoint The new target position in radians.
@@ -64,6 +65,13 @@ public class Arm extends SubsystemBase{
         m_armEncoder.setPosition(0);
     }
 
+    public void ArmStop(){
+        m_armMotor.set(0);
+    }
+    public void goBack(){
+        m_armMotor.set(-.5);
+    }
+
     /**
      * Drives the arm to a position using a trapezoidal motion profile.
      * This function is usually wrapped in a {@code RunCommand} which runs it repeatedly while the command is active.
@@ -79,21 +87,10 @@ public class Arm extends SubsystemBase{
             m_targetState = m_armProfile.calculate(elapsedTime, m_startState, m_endState);
         }
         m_feedforward = Constants.kArmFeedforward.calculate(
-            m_armEncoder.getPosition() + Constants.kArmZeroCosineOffset, m_targetState.velocity);
+            m_armEncoder.getPosition(), m_targetState.velocity);
         m_armPIDController.setReference(
             m_targetState.position, CANSparkMax.ControlType.kPosition, 0, m_feedforward);
     }
-/* Uncomment for manual arm testing
-    public void armMove(double turn){
-        SmartDashboard.putNumber("TURN Power (%)", turn);
-        
-        if(Math.abs(turn) < 0.1){
-            turn=0.0;
-        }
-        turn = Math.copySign(turn * turn, turn);
-        m_armMotor.set(turn);
-    }
-*/
 
 @Override
   public void periodic() {

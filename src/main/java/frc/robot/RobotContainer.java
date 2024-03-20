@@ -5,16 +5,24 @@
 package frc.robot;
 
 import frc.robot.subsystems.DriveTrain;
-import frc.robot.AutoRoutines.AutoSnL;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Climbers;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-
+import frc.robot.Commands.FullPickup;
+import frc.robot.Commands.FullShooter;
+import frc.robot.Commands.NoteAlign;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -28,12 +36,11 @@ public class RobotContainer {
   private final Intake intake = new Intake();
   private final Shooter shooter = new Shooter();
   private final Climbers climbers = new Climbers();
-
  
-  
   private final CommandXboxController driver = new CommandXboxController(Constants.DRIVER_PORT);
   private final CommandXboxController operator = new CommandXboxController(Constants.OPERATOR_PORT);
-  
+
+  private final SendableChooser<Command> autoChooser;
   public RobotContainer() {
     //set drivetrain subsystem default to our drive command
     driveTrain.setDefaultCommand(new RunCommand(() -> {
@@ -42,60 +49,66 @@ public class RobotContainer {
     // set the arm subsystem to run the "runAutomatic" function continuously when no other command is running
     arm.setDefaultCommand(new RunCommand(() -> {
       arm.runAutomatic();}, arm));
-
-    /*Use this default arm command for manual testing of the arm 
-      arm.setDefaultCommand(new RunCommand(() -> {
-      arm.armMove(-operator.getLeftY());},arm));
-    */
-
     
+    //Register Named Commands
+    NamedCommands.registerCommand("FullShooter", new FullShooter(intake, shooter));
+    NamedCommands.registerCommand("FullPickup", new FullPickup(intake, arm));
+    NamedCommands.registerCommand("NoteAlign", new NoteAlign(driveTrain));
 
+    autoChooser = AutoBuilder.buildAutoChooser("LongSideAuto");
+    new PathPlannerAuto("LongSideAuto");
+    SmartDashboard.putData("Auto Chooser", autoChooser);
 
      // Configure the trigger bindings
-     configureBindings();
-    }
-  
-  private void configureBindings() {
-     // set up arm preset positions
-    operator.b()
-      .onTrue(new InstantCommand(() -> arm.setTargetPosition(Constants.kScoringPosition)));
-    operator.a()
-      .onTrue(new InstantCommand(() -> arm.setTargetPosition(Constants.kFeedPosition)));
-    operator.y()
-      .onTrue(new InstantCommand(() -> arm.setTargetPosition(Constants.kHomePosition)));
+    configureBindings();
+  }
 
-    operator.x()
-    .onTrue(new InstantCommand(() -> shooter.activeShooter()))
-    .onFalse (new InstantCommand(()-> shooter.stopShooter()));
-    
-    operator.rightTrigger()
-      .onTrue(new InstantCommand(() -> intake.IntakeShoot()))
-      .onFalse(new InstantCommand(() -> intake.IntakeStop()));
-
-    operator.leftTrigger()
-      .onFalse(new InstantCommand(() ->intake.IntakeStop()))
-      .onTrue(new InstantCommand(() -> intake.IntakeFeed()));
-      
-    driver.leftTrigger()
-    .onTrue(new InstantCommand(() -> climbers.climberUp()))
-    .onFalse(new InstantCommand(() -> climbers.climberStop()));
+  private void configureBindings() {  
+    driver.a()
+    .onTrue(new NoteAlign(driveTrain).withTimeout(.1));
 
     driver.rightTrigger()
-    .onTrue(new InstantCommand(() -> climbers.climberDown()))
-    .onFalse(new InstantCommand(() -> climbers.climberStop()));
-    }
-    
+    .onTrue(new InstantCommand(() -> climbers.rightClimberUp()))
+    .onFalse(new InstantCommand(() -> climbers.rightClimberStop()));
   
+    driver.rightBumper()
+    .onTrue(new InstantCommand(() -> climbers.rightClimberDown()))
+    .onFalse (new InstantCommand(() -> climbers.rightClimberStop()));
 
+    driver.leftTrigger()
+    .onTrue(new InstantCommand(() -> climbers.leftClimberUp()))
+    .onFalse(new InstantCommand(() -> climbers.leftClimberStop()));
+  
+    driver.leftBumper()
+    .onTrue(new InstantCommand(() -> climbers.leftClimberDown()))
+    .onFalse (new InstantCommand(() -> climbers.leftClimberStop()));
 
+    operator.a()
+      .onTrue(new FullPickup(intake, arm));
+      
+    operator.b()
+    .onTrue(new FullShooter(intake, shooter));
+    
+    operator.leftTrigger()
+    .onTrue(new InstantCommand(() -> intake.IntakeFeed()))
+    .onFalse(new InstantCommand(() -> intake.IntakeStop()));
 
+    operator.rightTrigger()
+    .onTrue(new InstantCommand(() -> intake.IntakeShoot()))
+    .onFalse (new InstantCommand(() ->intake.IntakeStop()));
+
+    operator.x()
+    .onTrue(new InstantCommand(()->arm.goBack()).withTimeout(1));
+  }
+  
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new AutoSnL(driveTrain, intake, shooter);
+    return autoChooser.getSelected();
   }
 }
+
 
