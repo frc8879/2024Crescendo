@@ -95,9 +95,9 @@ public final class Constants {
     public static final double kArmFreeSpeed = 5676.0 * kArmVelocityFactor;
     public static final double karmV = 12/kArmFreeSpeed;
     public static final double kArmZeroCosineOffset = 1.342; // radians to add to converted arm position to get real-world arm position (starts at ~76.9deg angle)
-    public static final PIDGains kArmPositionGains = new PIDGains(0.21, 0.0, 0.00);
+    public static final PIDGains kArmPositionGains = new PIDGains(0.25, 0.0, 0.00);
     public static final ArmFeedforward kArmFeedforward =
-      new ArmFeedforward(0, 0.9105, 2, 0.1);    
+      new ArmFeedforward(0, 0.6995, 2, 0.1);    
     public static final TrapezoidProfile.Constraints kArmMotionConstraint = 
       new TrapezoidProfile.Constraints(.25, 2);
 

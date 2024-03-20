@@ -54,7 +54,7 @@ public class DriveTrain extends SubsystemBase {
     final double GOAL_RANGE_METERS = Units.inchesToMeters(7);
     final PhotonCamera frontCam = new PhotonCamera("Microsoft_LifeCam_HD-3000");
 
-    final double LINEAR_P = 2;
+    final double LINEAR_P = 3;
     final double LINEAR_D = 0.0;
     
     final double ANGULAR_P = 0.1;

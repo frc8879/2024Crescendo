@@ -12,7 +12,7 @@ public class FullShooter extends SequentialCommandGroup{
     public FullShooter(Intake intake, Shooter shooter){
         addCommands(
             new InstantCommand(() -> shooter.activeShooter()),
-            new WaitCommand(2),
+            new WaitCommand(1),
             new InstantCommand(() -> intake.IntakeShoot()),
             new WaitCommand(1),
             new InstantCommand(() -> shooter.stopShooter()),

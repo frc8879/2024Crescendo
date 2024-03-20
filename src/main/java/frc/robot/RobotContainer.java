@@ -44,7 +44,7 @@ public class RobotContainer {
   public RobotContainer() {
     //set drivetrain subsystem default to our drive command
     driveTrain.setDefaultCommand(new RunCommand(() -> {
-      driveTrain.arcadeDrive(driver.getLeftY(), -driver.getRightX());},driveTrain)); 
+      driveTrain.arcadeDrive(-driver.getLeftY(), -driver.getRightX());},driveTrain)); 
     
     // set the arm subsystem to run the "runAutomatic" function continuously when no other command is running
     arm.setDefaultCommand(new RunCommand(() -> {
